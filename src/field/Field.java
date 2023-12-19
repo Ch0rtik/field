@@ -1,13 +1,11 @@
 package field;
 
-import java.util.SplittableRandom;
-
 public class Field<T>{
     private FieldAddition<T> add;
-    private FieldMultiplication<T, FieldAddition<T>> multiply;
+    private FieldMultiplication<T> multiply;
     private T additiveIdentity;
     private T multiplicativeIdentity;
-    public Field(FieldAddition<T> add, FieldMultiplication<T, FieldAddition<T>> multiply){
+    public Field(FieldAddition<T> add, FieldMultiplication<T> multiply){
         this.add = add;
         this.multiply = multiply;
 
@@ -59,17 +57,17 @@ public class Field<T>{
         this.additiveIdentity = add.getIdentity();
     }
 
-    public void setMultiply(FieldMultiplication<T, FieldAddition<T>> multiply) {
+    public void setMultiply(FieldMultiplication<T> multiply) {
         this.multiply = multiply;
         this.multiplicativeIdentity = multiply.getIdentity();
     }
 
-    public FieldExpression createExpression(T value) {
-        return new FieldExpression(value);
+    public Expression createExpression(T value) {
+        return new Expression(value);
     }
 
-    public FieldExpression createExpression(FieldExpression value1, Action action, FieldExpression value2) {
-        return new FieldExpression(value1, action, value2);
+    public Expression createExpression(Expression value1, Action action, Expression value2) {
+        return new Expression(value1, action, value2);
     }
 
     public enum Action {
@@ -79,31 +77,39 @@ public class Field<T>{
         DIVIDE
     }
 
-    public class FieldExpression {
+    public Field<T> copy() {
+        FieldAddition<T> addition = new FieldAddition<>(add.getIdentity(), add.operation, add.inverseOperation);
+        return new Field<>(
+                addition,
+                new FieldMultiplication<>(multiply.getIdentity(), multiply.operation, multiply.inverseOperation, addition)
+        );
+    }
+
+    public class Expression {
 
         private T value;
         private boolean type = false;
 
-        private FieldExpression left_node;
-        private FieldExpression right_node;
+        private Expression left_node;
+        private Expression right_node;
 
         private Action action;
 
-        private FieldExpression(FieldExpression left_node,
-                               Action action,
-                               FieldExpression right_node) {
+        private Expression(Expression left_node,
+                           Action action,
+                           Expression right_node) {
             this.left_node = left_node;
             this.right_node = right_node;
             this.action = action;
             this.type = true;
         }
 
-        private FieldExpression(T value) {
+        private Expression(T value) {
             this.value = value;
         }
 
-        public FieldExpression append(Action action, FieldExpression expression) {
-            return new FieldExpression(this,  action, expression);
+        public Expression append(Action action, Expression expression) {
+            return new Expression(this,  action, expression);
         }
 
         public T reduce() {
@@ -118,8 +124,8 @@ public class Field<T>{
         @Override
         public String toString() {
             return !type ? value.toString() : switch (action) {
-                case ADD -> left_node.toString() + " + " + right_node.toString();
-                case SUBTRACT -> left_node.toString() + " - " + right_node.toString();
+                case ADD -> "(" + left_node.toString() + " + " + right_node.toString() + ")";
+                case SUBTRACT -> "(" + left_node.toString() + " - " + right_node.toString() + ")";
                 case MULTIPLY -> left_node.toString() + " * " + right_node.toString();
                 default -> left_node.toString() + " / " + right_node.toString();
             };
