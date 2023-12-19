@@ -20,7 +20,8 @@ public class FieldMultiplication<T> extends FieldOperatorAbstract<T> implements 
 
     @Override
     public T invert(T a) {
-        if (a == addition.getIdentity()) {
+        if (a.equals(addition.getIdentity())) {
+            System.out.println("Division by Zero!");
             return null;
         } else {
             return super.invert(a);

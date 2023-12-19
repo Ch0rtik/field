@@ -20,7 +20,7 @@ public class Main {
         System.out.println(doubleField.reciprocate(5.0));
         System.out.println(doubleField.getAdditiveIdentity());
         System.out.println(doubleField.getMultiplicativeIdentity());
-        //System.out.println(doubleField.getCharacteristic());
+        System.out.println(doubleField.getCharacteristic());
 
         System.out.println();
 
